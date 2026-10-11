@@ -1,0 +1,53 @@
+name: Send digest
+
+on:
+  schedule:
+    # 9 AM and 6 PM America/New_York across EDT/EST; the script sends once per slot.
+    - cron: "3 13,14,22,23 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Send now even if this slot was already sent
+        type: boolean
+        default: false
+
+concurrency:
+  group: job-db
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore job database
+        uses: actions/cache/restore@v4
+        with:
+          path: data/jobs.db
+          key: jobs-db-${{ github.run_id }}
+          restore-keys: jobs-db-
+
+      - name: Send digest
+        run: python -m src.main digest ${{ inputs.force && '--force' || '' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Save job database
+        if: always() && hashFiles('data/jobs.db') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: data/jobs.db
+          key: jobs-db-${{ github.run_id }}-${{ github.run_attempt }}

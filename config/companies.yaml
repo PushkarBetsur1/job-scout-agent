@@ -1,0 +1,211 @@
+settings:
+  timezone: America/New_York
+  digest_hours: [9, 18]          # local times for the daily digests
+  instant_threshold: 90          # score >= this -> immediate Telegram alert
+  digest_threshold: 80           # hardware/embedded/semiconductor roles: score >= this -> next digest
+  degree_match_threshold: 65     # other roles that accept a Computer Engineering degree: score >= this -> next digest
+  max_instant_alerts_per_run: 10 # overflow goes to the digest
+  max_llm_jobs_per_run: 40       # Gemini free tier allows ~1,000 requests/day; 40/hour stays under it
+  max_age_days: 14               # ignore postings older than this (when the date is known)
+  llm_provider: gemini           # gemini (free tier, GEMINI_API_KEY) or openai (paid, OPENAI_API_KEY)
+  llm_model: gemini-flash-lite-latest  # for openai use e.g. gpt-4o-mini; override with LLM_MODEL secret
+  llm_min_seconds_between_calls: 5     # keeps under the free tier's per-minute limit
+  resume_path: resume/resume.pdf
+  collector_workers: 8           # sources fetched in parallel
+  detail_workers: 12             # job descriptions fetched in parallel
+  workday_search_terms:
+    - new grad
+    - college graduate
+    - university graduate
+    - entry level
+    - early career
+  workday_max_pages: 2           # 20 results per page per search term
+  preferences: |
+    Target roles: new-grad / early-career (0-2 years) hardware engineering, embedded systems,
+    firmware, computer engineering, and semiconductor roles (digital/ASIC/FPGA design, design
+    verification, silicon validation, DFT, product/test engineering, embedded software).
+    Also open to other engineering/software roles that accept a Computer Engineering degree.
+    Location: anywhere in the United States, including remote.
+
+# ats: workday | greenhouse | lever | ashby | smartrecruiters | amazon | jibe | themuse
+#      | simplify | readme_table | adzuna | usajobs
+# semiconductor: true -> any engineering title at this company counts as relevant
+companies:
+  # ---------- New-grad aggregators ----------
+  - name: SimplifyJobs New-Grad list
+    ats: simplify
+    categories: [Hardware, Software, Software Engineering]
+  - name: SpeedyApply New Grad USA
+    ats: readme_table
+    url: https://raw.githubusercontent.com/speedyapply/2026-SWE-College-Jobs/main/NEW_GRAD_USA.md
+  - name: Zapply Hardware New Grad
+    ats: readme_table
+    url: https://raw.githubusercontent.com/zapplyjobs/New-Grad-Hardware-Engineering-Jobs-2026/main/README.md
+  - name: Zapply Software New Grad
+    ats: readme_table
+    url: https://raw.githubusercontent.com/zapplyjobs/New-Grad-Software-Engineering-Jobs-2026/main/README.md
+  - name: Jobright Engineering New Grad
+    ats: readme_table
+    url: https://raw.githubusercontent.com/jobright-ai/2026-Engineering-New-Grad/master/README.md
+  - name: Jobright Software New Grad
+    ats: readme_table
+    url: https://raw.githubusercontent.com/jobright-ai/2026-Software-Engineer-New-Grad/master/README.md
+  - name: The Muse (entry level)
+    ats: themuse
+    categories: [Science and Engineering, Software Engineering]
+  # Optional, need free API keys (see README); skipped automatically without them
+  - {name: Adzuna, ats: adzuna}
+  - {name: USAJOBS (recent graduates), ats: usajobs}
+
+  # ---------- Big tech with custom career APIs ----------
+  - {name: Amazon, ats: amazon}
+  - {name: AMD, ats: jibe, base_url: "https://careers.amd.com", semiconductor: true,
+     search_terms: [new college grad, new grad, college graduate, university, entry level, early career]}
+
+  # ---------- Semiconductors (Workday) ----------
+  - {name: NVIDIA, ats: workday, host: nvidia.wd5, tenant: nvidia, site: NVIDIAExternalCareerSite, semiconductor: true}
+  - {name: Intel, ats: workday, host: intel.wd1, tenant: intel, site: External, semiconductor: true}
+  - {name: Micron, ats: workday, host: micron.wd1, tenant: micron, site: External, semiconductor: true}
+  - {name: Marvell, ats: workday, host: marvell.wd1, tenant: marvell, site: MarvellCareers, semiconductor: true}
+  - {name: Analog Devices, ats: workday, host: analogdevices.wd1, tenant: analogdevices, site: External, semiconductor: true}
+  - {name: Applied Materials, ats: workday, host: amat.wd1, tenant: amat, site: External, semiconductor: true}
+  - {name: KLA, ats: workday, host: kla.wd1, tenant: kla, site: Search, semiconductor: true}
+  - {name: Cadence, ats: workday, host: cadence.wd1, tenant: cadence, site: External_Careers, semiconductor: true}
+  - {name: Broadcom, ats: workday, host: broadcom.wd1, tenant: broadcom, site: External_Career, semiconductor: true}
+  - {name: Microchip, ats: workday, host: microchiphr.wd5, tenant: microchiphr, site: External, semiconductor: true}
+  - {name: NXP, ats: workday, host: nxp.wd3, tenant: nxp, site: careers, semiconductor: true}
+  - {name: GlobalFoundries, ats: workday, host: globalfoundries.wd1, tenant: globalfoundries, site: External, semiconductor: true}
+  - {name: Samsung, ats: workday, host: sec.wd3, tenant: sec, site: Samsung_Careers, semiconductor: true}
+  - {name: Altera, ats: workday, host: altera.wd1, tenant: altera, site: altera, semiconductor: true}
+  - {name: Silicon Labs, ats: workday, host: silabs.wd1, tenant: silabs, site: SiliconLabsCareers, semiconductor: true}
+  - {name: Semtech, ats: workday, host: semtech.wd1, tenant: semtech, site: SemtechCareers, semiconductor: true}
+  - {name: Entegris, ats: workday, host: entegris.wd1, tenant: entegris, site: EntegrisCareers, semiconductor: true}
+
+  # ---------- Computing, networking, electronics (Workday) ----------
+  - {name: HPE, ats: workday, host: hpe.wd5, tenant: hpe, site: Jobsathpe}
+  - {name: HP, ats: workday, host: hp.wd5, tenant: hp, site: ExternalCareerSite}
+  - {name: Cisco, ats: workday, host: cisco.wd5, tenant: cisco, site: cisco_careers}
+  - {name: Ciena, ats: workday, host: ciena.wd5, tenant: ciena, site: Careers}
+  - {name: Motorola Solutions, ats: workday, host: motorolasolutions.wd5, tenant: motorolasolutions, site: Careers}
+  - {name: Trimble, ats: workday, host: trimble.wd1, tenant: trimble, site: TrimbleCareers}
+  - {name: Rockwell Automation, ats: workday, host: rockwellautomation.wd1, tenant: rockwellautomation, site: External_Rockwell_Automation}
+  - {name: Jabil, ats: workday, host: jabil.wd5, tenant: jabil, site: jabil_careers}
+  - {name: Philips, ats: workday, host: philips.wd3, tenant: philips, site: jobs-and-careers}
+  - {name: Medtronic, ats: workday, host: medtronic.wd1, tenant: medtronic, site: MedtronicCareers}
+
+  # ---------- Aerospace, defense, automotive (Workday) ----------
+  - {name: Boeing, ats: workday, host: boeing.wd1, tenant: boeing, site: External_Careers}
+  - {name: Northrop Grumman, ats: workday, host: ngc.wd1, tenant: ngc, site: Northrop_Grumman_External_Site}
+  - {name: RTX (Raytheon/Collins/Pratt), ats: workday, host: globalhr.wd5, tenant: globalhr, site: REC_RTX_Ext_Gateway}
+  - {name: GE Aerospace, ats: workday, host: geaerospace.wd5, tenant: geaerospace, site: GE_ExternalSite}
+  - {name: Leidos, ats: workday, host: leidos.wd5, tenant: leidos, site: External}
+  - {name: General Motors, ats: workday, host: generalmotors.wd5, tenant: generalmotors, site: Careers_GM}
+  - {name: Aptiv, ats: workday, host: aptiv.wd5, tenant: aptiv, site: aptiv_careers}
+
+  # ---------- Software/fintech that hire CompE grads (Workday) ----------
+  - {name: Capital One, ats: workday, host: capitalone.wd12, tenant: capitalone, site: Capital_One}
+  - {name: PayPal, ats: workday, host: paypal.wd1, tenant: paypal, site: jobs}
+  - {name: Visa, ats: workday, host: visa.wd5, tenant: visa, site: visa}
+
+  # ---------- SmartRecruiters (US postings) ----------
+  - {name: Bosch, ats: smartrecruiters, token: BoschGroup}
+  - {name: Western Digital, ats: smartrecruiters, token: WesternDigital, semiconductor: true}
+  - {name: Continental, ats: smartrecruiters, token: Continental}
+  - {name: Navitas Semiconductor, ats: smartrecruiters, token: Navitas, semiconductor: true}
+  - {name: ServiceNow, ats: smartrecruiters, token: ServiceNow}
+
+  # ---------- Semiconductor / AI hardware startups ----------
+  - {name: Tenstorrent, ats: greenhouse, token: tenstorrent, semiconductor: true}
+  - {name: SambaNova, ats: greenhouse, token: sambanovasystems, semiconductor: true}
+  - {name: Lightmatter, ats: greenhouse, token: lightmatter, semiconductor: true}
+  - {name: Astera Labs, ats: greenhouse, token: asteralabs, semiconductor: true}
+  - {name: Baya Systems, ats: greenhouse, token: bayasystems, semiconductor: true}
+  - {name: Cerebras, ats: ashby, token: cerebras, semiconductor: true}
+  - {name: Etched, ats: ashby, token: etched, semiconductor: true}
+  - {name: MatX, ats: ashby, token: matx, semiconductor: true}
+  - {name: Extropic, ats: ashby, token: extropic, semiconductor: true}
+  - {name: Normal Computing, ats: ashby, token: normalcomputing, semiconductor: true}
+  - {name: Pure Storage, ats: greenhouse, token: purestorage}
+
+  # ---------- Quantum ----------
+  - {name: PsiQuantum, ats: greenhouse, token: psiquantum}
+  - {name: IonQ, ats: greenhouse, token: ionq}
+
+  # ---------- Space & aerospace ----------
+  - {name: SpaceX, ats: greenhouse, token: spacex}
+  - {name: Rocket Lab, ats: greenhouse, token: rocketlab}
+  - {name: Relativity Space, ats: greenhouse, token: relativity}
+  - {name: Astranis, ats: greenhouse, token: astranis}
+  - {name: Planet, ats: greenhouse, token: planetlabs}
+  - {name: Spire Global, ats: greenhouse, token: spire}
+  - {name: Muon Space, ats: greenhouse, token: muonspace}
+  - {name: BlackSky, ats: greenhouse, token: blacksky}
+  - {name: HawkEye 360, ats: greenhouse, token: hawkeye360}
+  - {name: Ursa Major, ats: greenhouse, token: ursamajor}
+  - {name: Hermeus, ats: lever, token: hermeus}
+  - {name: Pyka, ats: lever, token: pyka}
+
+  # ---------- Defense tech ----------
+  - {name: Anduril, ats: greenhouse, token: andurilindustries}
+  - {name: Epirus, ats: greenhouse, token: epirus}
+  - {name: Mach Industries, ats: greenhouse, token: machindustries}
+  - {name: Shield AI, ats: lever, token: shieldai}
+  - {name: Palantir, ats: lever, token: palantir}
+  - {name: Saronic, ats: ashby, token: saronic}
+  - {name: Axon, ats: greenhouse, token: axon}
+
+  # ---------- Autonomy & robotics ----------
+  - {name: Waymo, ats: greenhouse, token: waymo}
+  - {name: Nuro, ats: greenhouse, token: nuro}
+  - {name: Motional, ats: greenhouse, token: motional}
+  - {name: Kodiak, ats: greenhouse, token: kodiak}
+  - {name: Zoox, ats: lever, token: zoox}
+  - {name: Aeva, ats: lever, token: aeva}
+  - {name: Waabi, ats: lever, token: waabi}
+  - {name: Zipline, ats: greenhouse, token: flyzipline}
+  - {name: Skydio, ats: ashby, token: skydio}
+  - {name: Figure AI, ats: greenhouse, token: figureai}
+  - {name: Agility Robotics, ats: greenhouse, token: agilityrobotics}
+  - {name: Apptronik, ats: greenhouse, token: apptronik}
+  - {name: 1X, ats: ashby, token: 1x}
+  - {name: Physical Intelligence, ats: ashby, token: physicalintelligence}
+  - {name: Dexterity, ats: lever, token: dexterity}
+  - {name: Applied Intuition, ats: ashby, token: applied}
+
+  # ---------- Consumer hardware, EV, energy, medtech ----------
+  - {name: Lucid Motors, ats: greenhouse, token: lucidmotors}
+  - {name: Redwood Materials, ats: greenhouse, token: redwoodmaterials}
+  - {name: Form Energy, ats: ashby, token: formenergy}
+  - {name: Helion, ats: ashby, token: helion}
+  - {name: Oklo, ats: greenhouse, token: oklo}
+  - {name: Samsara, ats: greenhouse, token: samsara}
+  - {name: Verkada, ats: greenhouse, token: verkada}
+  - {name: Oura, ats: greenhouse, token: oura}
+  - {name: WHOOP, ats: ashby, token: whoop}
+  - {name: Eight Sleep, ats: ashby, token: eightsleep}
+  - {name: Peloton, ats: greenhouse, token: peloton}
+  - {name: Formlabs, ats: greenhouse, token: formlabs}
+  - {name: Neuralink, ats: greenhouse, token: neuralink}
+  - {name: Butterfly Network, ats: greenhouse, token: butterflynetwork}
+
+  # ---------- Software / AI (new-grad SWE roles accepting CompE) ----------
+  - {name: OpenAI, ats: ashby, token: openai}
+  - {name: Anthropic, ats: greenhouse, token: anthropic}
+  - {name: Databricks, ats: greenhouse, token: databricks}
+  - {name: Cloudflare, ats: greenhouse, token: cloudflare}
+  - {name: Stripe, ats: greenhouse, token: stripe}
+  - {name: Figma, ats: greenhouse, token: figma}
+  - {name: Robinhood, ats: greenhouse, token: robinhood}
+  - {name: Coinbase, ats: greenhouse, token: coinbase}
+  - {name: Roblox, ats: greenhouse, token: roblox}
+  - {name: Airbnb, ats: greenhouse, token: airbnb}
+  - {name: Lyft, ats: greenhouse, token: lyft}
+  - {name: Pinterest, ats: greenhouse, token: pinterest}
+  - {name: Reddit, ats: greenhouse, token: reddit}
+  - {name: Datadog, ats: greenhouse, token: datadog}
+  - {name: MongoDB, ats: greenhouse, token: mongodb}
+  - {name: Scale AI, ats: greenhouse, token: scaleai}
+  - {name: Crusoe, ats: ashby, token: crusoe}
+  - {name: Lambda, ats: ashby, token: lambda}
+  - {name: Baseten, ats: ashby, token: baseten}
+  - {name: Ramp, ats: ashby, token: ramp}
