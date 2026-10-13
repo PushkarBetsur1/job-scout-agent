@@ -2,6 +2,20 @@ settings:
   timezone: America/New_York
   digest_hours: [9, 18]          # local times for the daily digests
   instant_threshold: 90          # score >= this -> immediate Telegram alert
+  instant_alert_companies:
+    - AMD
+    - Advanced Micro Devices
+    - Advanced Micro Devices, Inc.
+    - Qualcomm
+    - Qualcomm Incorporated
+    - Intel
+    - Intel Corporation
+    - Saronic
+    - Lam Research
+    - Lam Research Corporation
+    - GM
+    - General Motors
+    - General Motors Company
   digest_threshold: 80           # hardware/embedded/semiconductor roles: score >= this -> next digest
   degree_match_threshold: 65     # other roles that accept a Computer Engineering degree: score >= this -> next digest
   max_instant_alerts_per_run: 10 # overflow goes to the digest
@@ -27,7 +41,7 @@ settings:
     Also open to other engineering/software roles that accept a Computer Engineering degree.
     Location: anywhere in the United States, including remote.
 
-# ats: workday | greenhouse | lever | ashby | smartrecruiters | amazon | jibe | themuse
+# ats: workday | greenhouse | lever | ashby | eightfold | smartrecruiters | amazon | jibe | themuse
 #      | simplify | readme_table | adzuna | usajobs
 # semiconductor: true -> any engineering title at this company counts as relevant
 companies:
@@ -65,6 +79,7 @@ companies:
   # ---------- Semiconductors (Workday) ----------
   - {name: NVIDIA, ats: workday, host: nvidia.wd5, tenant: nvidia, site: NVIDIAExternalCareerSite, semiconductor: true}
   - {name: Intel, ats: workday, host: intel.wd1, tenant: intel, site: External, semiconductor: true}
+  - {name: Lam Research, ats: eightfold, host: careers.lamresearch.com, domain: lamresearch.com, semiconductor: true, max_pages: 25}
   - {name: Micron, ats: workday, host: micron.wd1, tenant: micron, site: External, semiconductor: true}
   - {name: Marvell, ats: workday, host: marvell.wd1, tenant: marvell, site: MarvellCareers, semiconductor: true}
   - {name: Analog Devices, ats: workday, host: analogdevices.wd1, tenant: analogdevices, site: External, semiconductor: true}

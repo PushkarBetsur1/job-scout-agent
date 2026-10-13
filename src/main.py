@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import re
 import time as time_module
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, time, timedelta
@@ -17,6 +18,12 @@ from .resume_matcher import PROVIDERS, load_resume, score_job
 
 ROOT = Path(__file__).resolve().parent.parent
 log = logging.getLogger("job-scout")
+
+
+def _is_instant_alert_company(company: str, settings: dict) -> bool:
+    normalize = lambda value: re.sub(r"[^a-z0-9]", "", value.lower())
+    target = normalize(company)
+    return target in {normalize(name) for name in settings.get("instant_alert_companies", [])}
 
 
 def _collect_one(company: dict, settings: dict) -> list:
@@ -84,6 +91,7 @@ def score_pending(cfg: dict, db: Database) -> None:
     resume = load_resume(ROOT / s["resume_path"])
     model = os.environ.get("LLM_MODEL") or s["llm_model"]
     pause = s.get("llm_min_seconds_between_calls", 0)
+    priority_instant: list[str] = []
     instant: list[str] = []
     for i, job in enumerate(jobs):
         if i and pause:
@@ -109,16 +117,20 @@ def score_pending(cfg: dict, db: Database) -> None:
         db.save_score(job["id"], result)
         log.info("%3d  %s — %s", result["score"], job["company"], job["title"])
         digest_min = s["degree_match_threshold"] if job["match_path"] == "degree" else s["digest_threshold"]
-        if result["score"] >= s["instant_threshold"]:
+        if result["eligible"] and _is_instant_alert_company(job["company"], s):
+            priority_instant.append(job["id"])
+        elif result["score"] >= s["instant_threshold"]:
             instant.append(job["id"])
         elif result["score"] >= digest_min:
             db.queue_for_digest([job["id"]])
         db.commit()
 
     cap = s["max_instant_alerts_per_run"]
-    for job_id in instant[:cap]:
+    for job_id in priority_instant + instant[:cap]:
         try:
-            notifier.send_instant(db.get(job_id))
+            job = db.get(job_id)
+            job["priority_alert"] = job_id in priority_instant
+            notifier.send_instant(job)
             db.mark_alerted(job_id)
         except Exception as exc:
             log.warning("Instant alert failed, moving to digest: %s", exc)

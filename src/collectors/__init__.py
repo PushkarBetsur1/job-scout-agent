@@ -1,10 +1,11 @@
-from . import adzuna, amazon, ashby, greenhouse, jibe, lever, readme_table, simplify, smartrecruiters, themuse, usajobs, workday
+from . import adzuna, amazon, ashby, eightfold, greenhouse, jibe, lever, readme_table, simplify, smartrecruiters, themuse, usajobs, workday
 
 COLLECTORS = {
     "workday": workday.collect,
     "greenhouse": greenhouse.collect,
     "lever": lever.collect,
     "ashby": ashby.collect,
+    "eightfold": eightfold.collect,
     "smartrecruiters": smartrecruiters.collect,
     "amazon": amazon.collect,
     "jibe": jibe.collect,

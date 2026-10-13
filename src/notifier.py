@@ -36,7 +36,7 @@ def _tag(job: dict) -> str:
 
 def send_instant(job: dict) -> None:
     lines = [
-        "<b>Top match</b>",
+        "<b>Priority company alert</b>" if job.get("priority_alert") else "<b>Top match</b>",
         f"<b>{_e(job['title'])}</b>",
         f"{job['score']}% fit{_tag(job)}",
         f"{_e(job['company'])} · {_e(_short(job['location']))}",
